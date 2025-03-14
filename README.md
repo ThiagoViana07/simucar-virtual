@@ -2,6 +2,8 @@
 
 Simucar é um laboratório virtual interativo para aprendizado de programação e robótica. 
 
+![Simucar Virtual](src/assets/tela-inicial.png)
+
 ## Tecnologias Utilizadas
 
 - **Vue.js**: Framework JavaScript progressivo para construção de interfaces de usuário.
