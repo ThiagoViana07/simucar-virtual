@@ -1,0 +1,35 @@
+{
+  "name": "lara-virtual",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@codemirror/lang-html": "^6.4.7",
+    "@codemirror/lang-javascript": "^6.2.1",
+    "@codemirror/lang-json": "^6.0.1",
+    "@codemirror/state": "6.x",
+    "@supabase/supabase-js": "^2.49.1",
+    "@vueuse/core": "^10.10.0",
+    "animejs": "^3.2.2",
+    "codemirror": "^6.0.1",
+    "dotenv": "^16.4.7",
+    "install": "^0.13.0",
+    "konva": "^9.3.16",
+    "pinia": "^3.0.1",
+    "vue": "^3.3.4",
+    "vue-codemirror": "^6.1.1",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.3",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "vite": "^4.4.5"
+  }
+}
