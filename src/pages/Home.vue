@@ -36,7 +36,7 @@
         </div>
         <Console :content="consoleError" class="mt-2" />
       </div>
-      <div class="w-[50%] border border-green-500 mt-2 relative">
+      <div @mousemove="mouseMove" class="w-[50%] border border-green-500 mt-2 relative">
         <div class="absolute right-0 -top-6 text-sm">
           <button
             @click="screen = 'planning'"
@@ -50,7 +50,9 @@
             @click="screen = 'visualization'"
             class="border px-2"
           >
-            Visualização
+            Visualização 
+            {{ mouseX }},
+            {{ mouseY }}
           </button>
         </div>
         <header
@@ -82,6 +84,7 @@
         </header>
 
         <div v-if="screen == 'visualization'" class="w-full relative">
+          <!-- <Road :width="700" :height="50" :dashCount="50" :positionY="75" /> -->
           <Cone v-for="cone in cones" :positionX="cone.x" :positionY="cone.y" />
           <Line
             v-for="(line, index) in linesDetection"
@@ -133,11 +136,12 @@ import Background from "../components/Background.vue";
 import Wbo from "../components/Wbo.vue";
 import Console from "../components/Console.vue";
 import { useAuthStore } from "../store/auth.js";
+import Road from "../components/Road.vue";
 //mudar os botoes de background de lugar, colonar parte superior em cima
 // pesquisar ferramente de planejamento de fluxograma
 
 export default {
-  components: { Cart, Cone, Line, Background, Wbo, Console },
+  components: { Cart, Cone, Line, Background, Wbo, Console,Road },
 
   setup() {
     const authStore = useAuthStore();
@@ -150,6 +154,8 @@ export default {
     const moveX = ref(0);
     const moveY = ref(0);
     const rotate = ref(0);
+    const mouseX = ref(0);
+    const mouseY = ref(0);
 
     const cones = reactive([]);
     const carts = reactive([]);
@@ -185,6 +191,12 @@ export default {
       // setTimeout(() => {
       //   verifyLine(code);
       // }, 1100);
+    }
+
+    function mouseMove(event) {
+      mouseX.value = event.clientX-512;
+      mouseY.value = event.clientY-100;
+    
     }
 
     function run(doc) {
@@ -302,7 +314,7 @@ export default {
           const foundNumbers = doc.match(regex);
           const numbers = foundNumbers.map((num) => parseFloat(num));
 
-          carts.push({ x: numbers[0], y: numbers[1] });
+          carts.push({ x: numbers[1], y: numbers[0] });
         }
       });
     }
@@ -374,6 +386,66 @@ export default {
       console.log("lines", lineRefs.value);
     }
 
+    // function verifyLineColor(left, right, top, bottom) {
+    //   colorSet.value = false;
+    //   lineRefs.value.forEach((lineRef, index) => {
+    //     if (lineRef && !colorSet.value) {
+    //       const {
+    //         bottom: lineBottom,
+    //         right: lineRight,
+    //         top: lineTop,
+    //         left: lineLeft,
+    //         width: lineWidth,
+    //         height: lineHeight,
+    //       } = useElementBounding(lineRef);
+         
+    //       const angle = lineRef.rotate || 0; // Supondo que a rotação esteja armazenada em lineRef.rotate
+    //       const rad = (angle * Math.PI) / 180;
+    //       const cos = Math.cos(rad);
+    //       const sin = Math.sin(rad);
+
+    //       const x1 = lineLeft.value;
+    //       const y1 = lineTop.value;
+    //       const x2 = x1 + lineWidth.value * cos - lineHeight.value * sin;
+    //       const y2 = y1 + lineWidth.value * sin + lineHeight.value * cos;
+
+    //       function isPointOnLine(px, py, x1, y1, x2, y2) {
+    //         const d1 = Math.sqrt((px - x1) ** 2 + (py - y1) ** 2);
+    //         const d2 = Math.sqrt((px - x2) ** 2 + (py - y2) ** 2);
+    //         const lineLen = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+    //         const buffer = 2; // Tolerância para considerar o ponto na linha
+    //         return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
+    //       }
+
+    //       const isOnLine =
+    //         isPointOnLine(left, top, x1, y1, x2, y2) ||
+    //         isPointOnLine(right, bottom, x1, y1, x2, y2);
+
+    //       if (isOnLine) {
+    //         colorDetectCart.value = lineRef.color;
+
+    //         verifyLoop(code.value);
+
+    //         if (colorDetectCart.value == matchColor.value) {
+    //           const regexCartFrente = /cart\.frente\(\s*([-+]?\d*\.?\d+)\s*\)/;
+    //           const matchCartFrente = code.value.match(regexCartFrente);
+
+    //           if (matchCartFrente) {
+    //             const value = parseFloat(matchCartFrente[1]); // Captura o valor de x em cart.frente(x)
+    //             moveX.value = moveCart.moveRight(value); // Substitui o número 20 pelo valor capturado
+    //             isMoveCart.value = !isMoveCart.value;
+    //           }
+    //         }
+
+    //         colorSet.value = true;
+    //       }
+    //     }
+    //   });
+    //   if (!colorSet.value) {
+    //     colorDetectCart.value = "#fff";
+    //   }
+    // }
+
     function verifyLineColor(left, right, top, bottom) {
       colorSet.value = false;
       lineRefs.value.forEach((lineRef, index) => {
@@ -386,84 +458,60 @@ export default {
             width: lineWidth,
             height: lineHeight,
           } = useElementBounding(lineRef);
-          console.log(
-            "Bottom:",
-            lineBottom.value,
-            "Right: ",
-            lineRight.value,
-            "Top: ",
-            lineTop.value,
-            "Left: ",
-            lineLeft.value
-          );
-          console.log(
-            "cart - ",
-            "Bottom: ",
-            bottom,
-            "Right: ",
-            right,
-            "Top: ",
-            top,
-            "Left: ",
-            left
-          );
-          const angle = lineRef.rotate || 0; // Supondo que a rotação esteja armazenada em lineRef.rotate
-          const rad = (angle * Math.PI) / 180;
-          const cos = Math.cos(rad);
-          const sin = Math.sin(rad);
 
-          const x1 = lineLeft.value;
-          const y1 = lineTop.value;
-          const x2 = x1 + lineWidth.value * cos - lineHeight.value * sin;
-          const y2 = y1 + lineWidth.value * sin + lineHeight.value * cos;
+          // Verifica se o ponto está dentro do retângulo delimitador da linha
+          if (
+            left >= lineLeft.value &&
+            right <= lineRight.value &&
+            top >= lineTop.value &&
+            bottom <= lineBottom.value
+          ) {
+            const angle = lineRef.rotate || 0; // Supondo que a rotação esteja armazenada em lineRef.rotate
+            const rad = (angle * Math.PI) / 180;
+            const cos = Math.cos(rad);
+            const sin = Math.sin(rad);
 
-          function isPointOnLine(px, py, x1, y1, x2, y2) {
-            const d1 = Math.sqrt((px - x1) ** 2 + (py - y1) ** 2);
-            const d2 = Math.sqrt((px - x2) ** 2 + (py - y2) ** 2);
-            const lineLen = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-            const buffer = 2; // Tolerância para considerar o ponto na linha
-            return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
-          }
+            const x1 = lineLeft.value;
+            const y1 = lineTop.value;
+            const x2 = x1 + lineWidth.value * cos - lineHeight.value * sin;
+            const y2 = y1 + lineWidth.value * sin + lineHeight.value * cos;
 
-          const isOnLine =
-            isPointOnLine(left, top, x1, y1, x2, y2) ||
-            isPointOnLine(right, bottom, x1, y1, x2, y2);
-
-          if (isOnLine) {
-            colorDetectCart.value = lineRef.color;
-
-            verifyLoop(code.value);
-
-            if (colorDetectCart.value == matchColor.value) {
-              console.log("aquii");
-              moveX.value = moveCart.moveRight(parseInt(20));
-              isMoveCart.value = !isMoveCart.value;
+            function isPointOnLine(px, py, x1, y1, x2, y2) {
+              const d1 = Math.sqrt((px - x1) ** 2 + (py - y1) ** 2);
+              const d2 = Math.sqrt((px - x2) ** 2 + (py - y2) ** 2);
+              const lineLen = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+              const buffer = lineHeight.value / 2; // Ajusta o buffer com base na altura da linha
+              return (
+                d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer
+              );
             }
 
-            colorSet.value = true;
+            const isOnLine =
+              isPointOnLine(left, top, x1, y1, x2, y2) ||
+              isPointOnLine(right, bottom, x1, y1, x2, y2);
+
+            if (isOnLine) {
+              colorDetectCart.value = lineRef.color;
+
+              verifyLoop(code.value);
+
+              if (colorDetectCart.value == matchColor.value) {
+                const regexCartFrente = /cart\.frente\(\s*([-+]?\d*\.?\d+)\s*\)/;
+                const matchCartFrente = code.value.match(regexCartFrente);
+
+                if (matchCartFrente) {
+                  const value = parseFloat(matchCartFrente[1]); // Captura o valor de x em cart.frente(x)
+                  moveX.value = moveCart.moveRight(value); // Substitui o número 20 pelo valor capturado
+                  isMoveCart.value = !isMoveCart.value;
+                }
+              }
+
+              colorSet.value = true;
+            }
           }
-          //   if (
-          //     left >= lineLeft.value + 45 &&
-          //     right <= lineRight.value - 45 &&
-          //     top >= lineTop.value + 45 &&
-          //     bottom <= lineBottom.value - 45
-          //   ) {
-          //     //colorLine.value = "#000";
-          //     colorDetectCart.value = lineRef.color;
-
-          //     verifyLoop(code.value);
-
-          //     if (colorDetectCart.value == matchColor.value) {
-          //       moveX.value = moveCart.moveRight(parseInt(20));
-          //       isMoveCart.value = !isMoveCart.value;
-          //     }
-
-          //     colorSet.value = true;
-          //   }
         }
       });
       if (!colorSet.value) {
-        //colorLine.value = "#fff";
         colorDetectCart.value = "#fff";
       }
     }
@@ -505,7 +553,7 @@ export default {
             ? background1.value
             : option == 2
             ? background2.value
-            : "cart.criar(100,100)",
+            : "",
         extensions: [basicSetup, javascript()],
       });
       viewContainer.value = new EditorView({
@@ -550,6 +598,9 @@ export default {
       consoleError,
       isError,
       logout,
+      mouseMove,
+      mouseX,
+      mouseY,
     };
   },
 };

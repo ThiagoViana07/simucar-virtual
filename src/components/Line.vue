@@ -4,9 +4,10 @@
       left: left + 'px',
       top: top + 'px',
       background: color,
-      rotate: angle + 'deg',
       width: width + 'px',
       height: thickness + 'px',
+      transform: `rotate(${angle}deg)`,
+      'transform-origin': 'left center',
     }"
     class="absolute"
   ></div>
